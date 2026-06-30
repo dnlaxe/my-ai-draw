@@ -1,0 +1,20 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+.app-shell {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.screen {
+  margin: 1rem 0;
+  padding: 1rem;
+}
+
+.dev-nav {
+  margin-top: 2rem;
+  padding-top: 1rem;
+}
