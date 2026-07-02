@@ -2,6 +2,7 @@ export type StrokePoint = { x: number; y: number };
 
 export type Stroke = {
   points: StrokePoint[];
+  width?: number;
 };
 
 export type StrokeCapture = {
@@ -53,7 +54,7 @@ export function createStrokeCapture(): StrokeCapture {
     },
 
     undo() {
-      strokes.slice(0, -1);
+      strokes = strokes.slice(0, -1);
       currentStroke = null;
       drawing = false;
       redraw();

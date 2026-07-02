@@ -69,3 +69,26 @@ export function getNextPrompt(
 export function trainingClassLabels(target: DrawTopic): UserLabel[] {
   return [target, "other"];
 }
+
+export function getTrainingStatusMessage(
+  labeled: Record<string, UserLabel>,
+  target: DrawTopic,
+  targetName: string,
+): string {
+  if (canStartTraining(labeled, target)) {
+    return "Ready to train";
+  }
+
+  const { positive, negative, total } = countLabels(labeled, target);
+  const needs: string[] = [];
+  if (positive < MIN_YES) {
+    needs.push(`${MIN_YES - positive} more ${targetName.toLowerCase()}`);
+  }
+  if (negative < MIN_NO) {
+    needs.push(`${MIN_NO - negative} more other`);
+  }
+  if (total < MIN_TOTAL) {
+    needs.push(`${MIN_TOTAL - total} more total`);
+  }
+  return `Need ${needs.join(", ")}.`;
+}
