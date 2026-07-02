@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import type { DrawTopic } from "./drawBank";
+import { MAX_TOPICS, type DrawTopic } from "./drawBank";
 import type { Stroke } from "./draw/strokeCapture";
 import type { UserLabel } from "./labels";
 import { DevNav } from "./components/DevNav";
@@ -10,6 +10,11 @@ import { PickScreen } from "./screens/PickScreen";
 import { TestScreen } from "./screens/TestScreen";
 import { TrainScreen } from "./screens/TrainScreen";
 import type { Screen } from "./screens/types";
+import {
+  getUntrainedTopics,
+  loadLibrary,
+  type TrainingLibrary,
+} from "./storage/trainingLibraryStore";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
@@ -20,8 +25,18 @@ export default function App() {
   const [drawingStrokes, setDrawingStrokes] = useState<
     Record<string, Stroke[]>
   >({});
+  const [library, setLibrary] = useState<TrainingLibrary>(() => loadLibrary());
+  const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
+
+  const untrainedTopics = getUntrainedTopics(library.records);
+  const canAddTopic =
+    library.records.length < MAX_TOPICS && untrainedTopics.length > 0;
 
   function handleAddTopic() {
+    if (!canAddTopic) {
+      return;
+    }
+    setEditingRecordId(null);
     setTargetLabel(null);
     setLabeledDrawings({});
     setDrawingStrokes({});
@@ -29,6 +44,10 @@ export default function App() {
   }
 
   function handlePickTopic(topic: DrawTopic) {
+    if (!untrainedTopics.includes(topic)) {
+      return;
+    }
+    setEditingRecordId(null);
     setTargetLabel(topic);
     setLabeledDrawings({});
     setDrawingStrokes({});
@@ -54,10 +73,19 @@ export default function App() {
       </header>
 
       {screen === "home" && (
-        <HomeScreen onNavigate={setScreen} onAdd={handleAddTopic} />
+        <HomeScreen
+          onNavigate={setScreen}
+          onAdd={handleAddTopic}
+          canAddTopic={canAddTopic}
+          recordCount={library.records.length}
+        />
       )}
       {screen === "pick" && (
-        <PickScreen onChoose={handlePickTopic} onNavigate={setScreen} />
+        <PickScreen
+          availableTopics={untrainedTopics}
+          onChoose={handlePickTopic}
+          onNavigate={setScreen}
+        />
       )}
       {screen === "label" && targetLabel && (
         <LabelScreen
