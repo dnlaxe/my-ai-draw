@@ -11,6 +11,8 @@ export type StrokeCapture = {
   clear(): void;
   undo(): void;
   getStrokes(): Stroke[];
+  redraw(): void;
+  onStrokeEnd: (() => void) | null;
 };
 
 export function createStrokeCapture(): StrokeCapture {
@@ -21,6 +23,7 @@ export function createStrokeCapture(): StrokeCapture {
   let drawing = false;
 
   const capture: StrokeCapture = {
+    onStrokeEnd: null,
     attach(nextCanvas) {
       capture.detach();
       canvas = nextCanvas;
@@ -29,6 +32,8 @@ export function createStrokeCapture(): StrokeCapture {
       canvas.addEventListener("pointerdown", onPointerDown);
       canvas.addEventListener("pointermove", onPointerMove);
       canvas.addEventListener("pointerup", onPointerUp);
+      canvas.addEventListener("pointerleave", onPointerUp);
+      canvas.addEventListener("pointercancel", onPointerUp);
     },
 
     detach() {
@@ -39,6 +44,8 @@ export function createStrokeCapture(): StrokeCapture {
       canvas.removeEventListener("pointerdown", onPointerDown);
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointerleave", onPointerUp);
+      canvas.removeEventListener("pointercancel", onPointerUp);
 
       canvas = null;
       context = null;
@@ -64,6 +71,19 @@ export function createStrokeCapture(): StrokeCapture {
       return strokes.map((stroke) => ({
         points: stroke.points.map((point) => ({ ...point })),
       }));
+    },
+
+    redraw() {
+      if (!canvas || !context) {
+        return;
+      }
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      for (const stroke of strokes) {
+        drawStroke(context, stroke);
+      }
+      if (currentStroke) {
+        drawStroke(context, currentStroke);
+      }
     },
   };
 
@@ -113,7 +133,8 @@ export function createStrokeCapture(): StrokeCapture {
     }
 
     currentStroke = null;
-    redraw();
+    capture.redraw();
+    capture.onStrokeEnd?.();
   }
 
   function redraw() {

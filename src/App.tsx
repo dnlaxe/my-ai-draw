@@ -206,7 +206,7 @@ export default function App() {
             onRetry={() => setScreen("label")}
           />
         )}
-        {screen === "test" && <TestScreen onNavigate={setScreen} />}
+        {screen === "test" && <TestScreen />}
 
         <DevNav screen={screen} onNavigate={setScreen} />
       </main>

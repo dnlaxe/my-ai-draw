@@ -25,7 +25,6 @@ type LabelScreenProps = {
 export function LabelScreen({
   target,
   labeled,
-  strokes,
   onAddDrawing,
   onNavigate,
 }: LabelScreenProps) {

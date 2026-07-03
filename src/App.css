@@ -80,3 +80,21 @@ body {
   background: white;
   cursor: pointer;
 }
+
+.test-screen canvas {
+  border: 1px solid #ccc;
+  touch-action: none;
+}
+
+.confidence-rankings {
+  list-style: none;
+  padding: 0;
+}
+
+.confidence-rankings li {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
