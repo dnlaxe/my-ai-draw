@@ -8,11 +8,12 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { LabelScreen } from "./screens/LabelScreen";
 import { PickScreen } from "./screens/PickScreen";
 import { TestScreen } from "./screens/TestScreen";
-import { TrainScreen } from "./screens/TrainScreen";
+import { TrainScreen, type TrainingResult } from "./screens/TrainScreen";
 import type { Screen } from "./screens/types";
 import {
   getUntrainedTopics,
   loadLibrary,
+  upsertRecord,
   type TrainingLibrary,
 } from "./storage/trainingLibraryStore";
 
@@ -31,6 +32,10 @@ export default function App() {
   const untrainedTopics = getUntrainedTopics(library.records);
   const canAddTopic =
     library.records.length < MAX_TOPICS && untrainedTopics.length > 0;
+
+  function refreshLibrary() {
+    setLibrary(loadLibrary());
+  }
 
   function handleAddTopic() {
     if (!canAddTopic) {
@@ -65,6 +70,25 @@ export default function App() {
     }));
   }
 
+  function handleTrainingComplete(result: TrainingResult) {
+    if (!targetLabel) {
+      return;
+    }
+
+    upsertRecord({
+      id: result.recordId,
+      targetLabel,
+      labeledDrawings,
+      drawingStrokes,
+      accuracy: result.accuracy,
+      exampleCount: Object.keys(labeledDrawings).length,
+    });
+
+    setEditingRecordId(null);
+    refreshLibrary();
+    setScreen("test");
+  }
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -96,7 +120,16 @@ export default function App() {
           onNavigate={setScreen}
         />
       )}
-      {screen === "train" && <TrainScreen onNavigate={setScreen} />}
+      {screen === "train" && targetLabel && (
+        <TrainScreen
+          targetLabel={targetLabel}
+          labeledDrawings={labeledDrawings}
+          drawingStrokes={drawingStrokes}
+          recordId={editingRecordId}
+          onComplete={handleTrainingComplete}
+          onRetry={() => setScreen("label")}
+        />
+      )}
       {screen === "test" && <TestScreen onNavigate={setScreen} />}
 
       <DevNav screen={screen} onNavigate={setScreen} />
