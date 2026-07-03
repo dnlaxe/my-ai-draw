@@ -1,0 +1,21 @@
+type HomeButtonProps = {
+  onClick: () => void;
+};
+
+export function HomeButton({ onClick }: HomeButtonProps) {
+  return (
+    <button
+      type="button"
+      className="home-nav-button"
+      onClick={onClick}
+      aria-label="Home"
+    >
+      <svg viewBox="0 0 24 24" width={24} height={24} aria-hidden="true">
+        <path
+          d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
+  );
+}

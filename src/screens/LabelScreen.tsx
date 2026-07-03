@@ -13,7 +13,6 @@ import {
   type UserLabel,
 } from "../labels";
 import type { Navigate } from "./types";
-import { extractFromStrokes } from "../draw/featureExtractor";
 
 type LabelScreenProps = {
   target: DrawTopic;
@@ -65,14 +64,6 @@ export function LabelScreen({
       return;
     }
 
-    const features = extractFromStrokes(canvasStrokes);
-    console.log("feature length:", features.length);
-    console.log("extras:", features.slice(1024)); //
-    console.log(
-      "ink pixels:",
-      features.slice(0, 1024).filter((v) => v > 0).length,
-    );
-
     onAddDrawing(crypto.randomUUID(), prompt.label, canvasStrokes);
     captureRef.current.clear();
   }
@@ -103,9 +94,6 @@ export function LabelScreen({
       </button>
       <button type="button" onClick={handleSaveDrawing} disabled={!prompt}>
         Save this drawing
-      </button>
-      <button type="button" onClick={() => console.log({ labeled, strokes })}>
-        Log dataset
       </button>
       <button
         type="button"

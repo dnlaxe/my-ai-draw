@@ -1,31 +1,44 @@
-import { MAX_TOPICS } from "../drawBank";
-import type { Navigate } from "./types";
+import { TrainingRecordList } from "../components/TrainingRecordList";
+import type { TrainingRecord } from "../storage/trainingLibraryStore";
 
 type HomeScreenProps = {
-  onNavigate: Navigate;
-  onAdd: () => void;
+  records: TrainingRecord[];
   canAddTopic: boolean;
-  recordCount: number;
+  onAdd: () => void;
+  onTest: () => void;
+  onRemove: (recordId: string) => void;
+  onAddMore: (recordId: string) => void;
 };
 
 export function HomeScreen({
-  onNavigate,
-  onAdd,
+  records,
   canAddTopic,
-  recordCount,
+  onAdd,
+  onTest,
+  onRemove,
+  onAddMore,
 }: HomeScreenProps) {
+  const hasModels = records.length > 0;
+
   return (
     <section className="screen">
       <h2>Home</h2>
-      <p>
-        Trained models: {recordCount} / {MAX_TOPICS}
-      </p>
+
       <button type="button" onClick={onAdd} disabled={!canAddTopic}>
         + Add a topic
       </button>
-      <button type="button" onClick={() => onNavigate("test")}>
-        Test doodles
-      </button>
+
+      <TrainingRecordList
+        records={records}
+        onRemove={onRemove}
+        onAddMore={onAddMore}
+      />
+
+      {hasModels ? (
+        <button type="button" onClick={onTest}>
+          Test doodles
+        </button>
+      ) : null}
     </section>
   );
 }

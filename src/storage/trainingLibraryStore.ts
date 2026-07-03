@@ -1,4 +1,4 @@
-import { ALL_TOPICS, type DrawTopic } from "../drawBank";
+import { ALL_TOPICS, LABEL_DISPLAY, type DrawTopic } from "../drawBank";
 import type { UserLabel } from "../labels";
 import type { Stroke } from "../draw/strokeCapture";
 
@@ -76,4 +76,22 @@ export function getTrainedTopics(records: TrainingRecord[]): DrawTopic[] {
 export function getUntrainedTopics(records: TrainingRecord[]): DrawTopic[] {
   const trained = new Set(getTrainedTopics(records));
   return ALL_TOPICS.filter((topic) => !trained.has(topic));
+}
+
+export function removeRecord(recordId: string): TrainingRecord | null {
+  const library = loadLibrary();
+  const removed =
+    library.records.find((record) => record.id === recordId) ?? null;
+  library.records = library.records.filter((record) => record.id !== recordId);
+
+  if (library.activeRecordId === recordId) {
+    library.activeRecordId = library.records[0]?.id ?? null;
+  }
+
+  saveLibrary(library);
+  return removed;
+}
+
+export function formatRecordTitle(record: TrainingRecord): string {
+  return LABEL_DISPLAY[record.targetLabel];
 }
