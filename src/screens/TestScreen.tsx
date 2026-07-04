@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { pickTestIdlePhrase } from "../copy/phrases";
 import { createStrokeCapture } from "../draw/strokeCapture";
 import {
   confidencePercent,
@@ -22,16 +23,17 @@ export function TestScreen() {
   const modelsRef = useRef<LoadedTopicClassifier[]>([]);
   const isActiveRef = useRef(true);
 
-  const [status, setStatus] = useState("Loading models...");
+  const [status, setStatus] = useState("Getting my doodle brain ready...");
   const [guess, setGuess] = useState<MultiTopicGuess | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [idleHeadline] = useState(() => pickTestIdlePhrase());
 
   useEffect(() => {
     isActiveRef.current = true;
     let cancelled = false;
 
     async function start() {
-      setStatus("Loading models...");
+      setStatus("Getting my doodle brain ready...");
       try {
         const models = await loadAllTrainedClassifiers();
 
@@ -43,14 +45,14 @@ export function TestScreen() {
         }
 
         if (models.length === 0) {
-          setStatus("No trained models yet. Train one first.");
+          setStatus("I don't know any doodles yet. Teach me one first.");
           return;
         }
 
         modelsRef.current = models;
 
         setGuess({
-          headline: "Draw a doodle!",
+          headline: idleHeadline,
           detail: "",
           confidence: 0,
           topic: null,
@@ -69,7 +71,9 @@ export function TestScreen() {
       } catch (error) {
         if (cancelled) return;
         setStatus(
-          error instanceof Error ? error.message : "Failed to load models.",
+          error instanceof Error
+            ? error.message
+            : "I couldn't load what I learned. Try again.",
         );
       }
     }
@@ -84,7 +88,7 @@ export function TestScreen() {
       }
       modelsRef.current = [];
     };
-  }, []);
+  }, [idleHeadline]);
 
   const resetIdleGuess = useCallback(() => {
     const models = modelsRef.current;
@@ -93,7 +97,7 @@ export function TestScreen() {
     }
 
     setGuess({
-      headline: "Draw a doodle!",
+      headline: idleHeadline,
       detail: "",
       confidence: 0,
       topic: null,
@@ -106,7 +110,7 @@ export function TestScreen() {
       })),
       unknownConfidence: 1,
     });
-  }, []);
+  }, [idleHeadline]);
 
   const runGuess = useCallback(() => {
     if (!isActiveRef.current) {
@@ -173,7 +177,7 @@ export function TestScreen() {
 
   return (
     <section className="screen test-screen">
-      <h2>Test</h2>
+      <h2>Try my AI</h2>
       <div className="prediction-panel" aria-live="polite">
         {guess ? (
           <>
@@ -207,8 +211,6 @@ export function TestScreen() {
           <p>{status}</p>
         )}
       </div>
-      <p>Ready: {isReady ? "yes" : "no"}</p>
-      <p>Topics: {guess?.rankings.length ?? 0}</p>
       <canvas
         ref={canvasRef}
         width={320}

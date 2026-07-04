@@ -1,35 +1,29 @@
 import { LABEL_DISPLAY, MAX_TOPICS, type DrawTopic } from "../drawBank";
-import type { Navigate } from "./types";
 
 type PickScreenProps = {
   availableTopics: DrawTopic[];
   onChoose: (topic: DrawTopic) => void;
-  onNavigate: Navigate;
 };
 
-export function PickScreen({
-  availableTopics,
-  onChoose,
-  onNavigate,
-}: PickScreenProps) {
+export function PickScreen({ availableTopics, onChoose }: PickScreenProps) {
   return (
     <section className="screen">
-      <h2>Pick a topic</h2>
-      <p>Train up to {MAX_TOPICS} topics.</p>
+      <h2>What should I learn?</h2>
+      <p>You can teach me up to {MAX_TOPICS} kinds of doodles.</p>
 
-      <ul>
-        {availableTopics.map((topic) => (
-          <li key={topic}>
-            <button type="button" onClick={() => onChoose(topic)}>
-              {LABEL_DISPLAY[topic]}
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      <button type="button" onClick={() => onNavigate("home")}>
-        Back
-      </button>
+      {availableTopics.length > 0 ? (
+        <ul>
+          {availableTopics.map((topic) => (
+            <li key={topic}>
+              <button type="button" onClick={() => onChoose(topic)}>
+                {LABEL_DISPLAY[topic]}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>You've already taught me every topic for now.</p>
+      )}
     </section>
   );
 }

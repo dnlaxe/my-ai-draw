@@ -23,10 +23,18 @@ export function ConfirmDialog({
       >
         <p>{message}</p>
         <div className="confirm-dialog-actions">
-          <button type="button" onClick={onCancel}>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="button-pill button-pill--light"
+          >
             {cancelLabel}
           </button>
-          <button type="button" onClick={onConfirm}>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="button-pill button-pill--danger"
+          >
             {confirmLabel}
           </button>
         </div>

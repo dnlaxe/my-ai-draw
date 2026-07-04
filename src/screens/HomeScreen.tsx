@@ -1,4 +1,7 @@
+import { useMemo } from "react";
+import { LABEL_DISPLAY } from "../drawBank";
 import { TrainingRecordList } from "../components/TrainingRecordList";
+import { pickHomeProgressPhrase } from "../copy/phrases";
 import type { TrainingRecord } from "../storage/trainingLibraryStore";
 
 type HomeScreenProps = {
@@ -19,24 +22,38 @@ export function HomeScreen({
   onAddMore,
 }: HomeScreenProps) {
   const hasModels = records.length > 0;
+  const progressPhrase = useMemo(() => {
+    if (!hasModels) {
+      return null;
+    }
+
+    const topicNames = records.map(
+      (record) => LABEL_DISPLAY[record.targetLabel],
+    );
+    return pickHomeProgressPhrase(topicNames, canAddTopic);
+  }, [records, hasModels, canAddTopic]);
 
   return (
     <section className="screen">
-      <h2>Home</h2>
+      <h2>My AI</h2>
+
+      {progressPhrase ? <p>{progressPhrase}</p> : null}
 
       <button type="button" onClick={onAdd} disabled={!canAddTopic}>
-        + Add a topic
+        + Teach a topic
       </button>
 
-      <TrainingRecordList
-        records={records}
-        onRemove={onRemove}
-        onAddMore={onAddMore}
-      />
+      <div>
+        <TrainingRecordList
+          records={records}
+          onRemove={onRemove}
+          onAddMore={onAddMore}
+        />
+      </div>
 
       {hasModels ? (
         <button type="button" onClick={onTest}>
-          Test doodles
+          Try a doodle
         </button>
       ) : null}
     </section>

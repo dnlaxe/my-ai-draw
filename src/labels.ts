@@ -1,10 +1,18 @@
 import type { DrawTopic } from "./drawBank";
+import {
+  pickLabelNeedMorePhrase,
+  pickLabelPromptMoreOtherPhrase,
+  pickLabelPromptMoreTargetPhrase,
+  pickLabelPromptOtherPhrase,
+  pickLabelPromptTargetPhrase,
+  pickLabelReadyPhrase,
+} from "./copy/phrases";
 
 export type UserLabel = DrawTopic | "other";
 
-export const MIN_TOTAL = 8;
-export const MIN_YES = 2;
-export const MIN_NO = 2;
+export const MIN_YES = 4;
+export const MIN_NO = 4;
+export const MIN_TOTAL = MIN_YES + MIN_NO;
 
 export function countLabels(
   labeled: Record<string, UserLabel>,
@@ -20,8 +28,8 @@ export function canStartTraining(
   labeled: Record<string, UserLabel>,
   target: DrawTopic,
 ) {
-  const { positive, negative, total } = countLabels(labeled, target);
-  return total >= MIN_TOTAL && positive >= MIN_YES && negative >= MIN_NO;
+  const { positive, negative } = countLabels(labeled, target);
+  return positive >= MIN_YES && negative >= MIN_NO;
 }
 
 export type Prompt = {
@@ -29,41 +37,56 @@ export type Prompt = {
   instruction: string;
 };
 
+function getBalancedFollowUpPrompt(
+  positive: number,
+  negative: number,
+  target: DrawTopic,
+  targetName: string,
+): Prompt {
+  if (positive <= negative) {
+    return {
+      label: target,
+      instruction: pickLabelPromptMoreTargetPhrase(targetName),
+    };
+  }
+
+  return {
+    label: "other",
+    instruction: pickLabelPromptMoreOtherPhrase(targetName),
+  };
+}
+
 export function getNextPrompt(
   labeled: Record<string, UserLabel>,
   target: DrawTopic,
   targetName: string,
+  options?: { keepAdding?: boolean },
 ): Prompt | null {
   const { positive, negative, total } = countLabels(labeled, target);
 
   if (positive < MIN_YES) {
     return {
       label: target,
-      instruction: `Draw a ${targetName.toLowerCase()}`,
+      instruction: pickLabelPromptTargetPhrase(targetName),
     };
   }
 
   if (negative < MIN_NO) {
     return {
       label: "other",
-      instruction: `Draw something that is not a ${targetName.toLowerCase()}`,
+      instruction: pickLabelPromptOtherPhrase(targetName),
     };
   }
 
   if (total < MIN_TOTAL) {
-    if (positive <= negative) {
-      return {
-        label: target,
-        instruction: `Draw another ${targetName.toLowerCase()}`,
-      };
-    }
-    return {
-      label: "other",
-      instruction: `Draw another doodle that is not a ${targetName.toLowerCase()}`,
-    };
+    return getBalancedFollowUpPrompt(positive, negative, target, targetName);
   }
 
-  return null;
+  if (!options?.keepAdding) {
+    return null;
+  }
+
+  return getBalancedFollowUpPrompt(positive, negative, target, targetName);
 }
 
 export function trainingClassLabels(target: DrawTopic): UserLabel[] {
@@ -74,21 +97,23 @@ export function getTrainingStatusMessage(
   labeled: Record<string, UserLabel>,
   target: DrawTopic,
   targetName: string,
+  options?: { keepAdding?: boolean },
 ): string {
   if (canStartTraining(labeled, target)) {
-    return "Ready to train";
+    return pickLabelReadyPhrase(Boolean(options?.keepAdding));
   }
 
-  const { positive, negative, total } = countLabels(labeled, target);
+  const { positive, negative } = countLabels(labeled, target);
   const needs: string[] = [];
   if (positive < MIN_YES) {
-    needs.push(`${MIN_YES - positive} more ${targetName.toLowerCase()}`);
+    const missing = MIN_YES - positive;
+    needs.push(
+      `${missing} more ${targetName.toLowerCase()} doodle${missing === 1 ? "" : "s"}`,
+    );
   }
   if (negative < MIN_NO) {
-    needs.push(`${MIN_NO - negative} more other`);
+    const missing = MIN_NO - negative;
+    needs.push(`${missing} more other doodle${missing === 1 ? "" : "s"}`);
   }
-  if (total < MIN_TOTAL) {
-    needs.push(`${MIN_TOTAL - total} more total`);
-  }
-  return `Need ${needs.join(", ")}.`;
+  return pickLabelNeedMorePhrase(needs);
 }

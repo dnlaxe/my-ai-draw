@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { LABEL_DISPLAY } from "../drawBank";
+import { pickHomeEmptyPhrase } from "../copy/phrases";
 import {
   formatRecordTitle,
   type TrainingRecord,
@@ -19,29 +21,33 @@ export function TrainingRecordList({
   onRemove,
   onAddMore,
 }: TrainingRecordListProps) {
+  const emptyPhrase = useMemo(() => pickHomeEmptyPhrase(), []);
+
   if (records.length === 0) {
-    return <p>No models yet. Tap + to train one.</p>;
+    return <p>{emptyPhrase}</p>;
   }
 
   return (
-    <ul className="home-model-grid">
+    <ul>
       {records.map((record) => (
-        <li key={record.id} className="home-model-card">
+        <li key={record.id}>
           <button
             type="button"
-            className="home-model-remove"
             onClick={() => onRemove(record.id)}
             aria-label={`Remove ${formatRecordTitle(record)}`}
           >
             ×
           </button>
 
-          <p className="home-model-name">{LABEL_DISPLAY[record.targetLabel]}</p>
-          <p>Training score: {accuracyPercent(record.accuracy)}%</p>
-          <p>{record.exampleCount} drawings</p>
+          <p>{LABEL_DISPLAY[record.targetLabel]}</p>
+
+          <div>
+            <p>How well I learned: {accuracyPercent(record.accuracy)}%</p>
+            <p>{record.exampleCount} saved drawings</p>
+          </div>
 
           <button type="button" onClick={() => onAddMore(record.id)}>
-            Add more
+            Add more drawings
           </button>
         </li>
       ))}

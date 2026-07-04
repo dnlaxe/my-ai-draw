@@ -6,7 +6,7 @@ export function HomeButton({ onClick }: HomeButtonProps) {
   return (
     <button
       type="button"
-      className="home-nav-button"
+      className="home-button"
       onClick={onClick}
       aria-label="Home"
     >

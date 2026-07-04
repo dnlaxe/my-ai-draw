@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { DrawTopic } from "../drawBank";
 import { LABEL_DISPLAY } from "../drawBank";
+import {
+  pickLabelDonePhrase,
+  pickLabelSaveEmptyPhrase,
+  pickLabelTitlePhrase,
+} from "../copy/phrases";
 import { createStrokeCapture, type Stroke } from "../draw/strokeCapture";
 import {
   canStartTraining,
@@ -16,14 +21,15 @@ import type { Navigate } from "./types";
 
 type LabelScreenProps = {
   target: DrawTopic;
+  labelMode: "new" | "addMore";
   labeled: Record<string, UserLabel>;
-  strokes: Record<string, Stroke[]>;
   onAddDrawing: (id: string, label: UserLabel, strokes: Stroke[]) => void;
   onNavigate: Navigate;
 };
 
 export function LabelScreen({
   target,
+  labelMode,
   labeled,
   onAddDrawing,
   onNavigate,
@@ -35,8 +41,16 @@ export function LabelScreen({
   const captureRef = useRef(createStrokeCapture());
 
   const counts = countLabels(labeled, target);
-  const prompt = getNextPrompt(labeled, target, targetName);
+  const prompt = getNextPrompt(labeled, target, targetName, {
+    keepAdding: labelMode === "addMore",
+  });
   const ready = canStartTraining(labeled, target);
+  const promptText = prompt
+    ? prompt.instruction
+    : pickLabelDonePhrase(labelMode === "addMore");
+  const statusText = getTrainingStatusMessage(labeled, target, targetName, {
+    keepAdding: labelMode === "addMore",
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -59,7 +73,7 @@ export function LabelScreen({
 
     const canvasStrokes = captureRef.current.getStrokes();
     if (canvasStrokes.length === 0) {
-      setSaveError("Draw something first.");
+      setSaveError(pickLabelSaveEmptyPhrase());
       return;
     }
 
@@ -69,17 +83,17 @@ export function LabelScreen({
 
   return (
     <section className="screen">
-      <h2>Label drawings — {targetName}</h2>
+      <h2>{pickLabelTitlePhrase(targetName)}</h2>
       <div>
-        <p>{prompt ? prompt.instruction : "All prompts done."}</p>
+        <p>{promptText}</p>
         <p>
-          Drawings saved: {counts.total}/{MIN_TOTAL}
+          Saved drawings: {counts.total}/{MIN_TOTAL}
         </p>
         <p>
-          {targetName}: {counts.positive} (min {MIN_YES}) · Other:{" "}
-          {counts.negative} (min {MIN_NO})
+          {targetName}: {counts.positive} (need {MIN_YES}) · Other:{" "}
+          {counts.negative} (need {MIN_NO})
         </p>
-        <p>{getTrainingStatusMessage(labeled, target, targetName)}</p>
+        <p>{statusText}</p>
       </div>
       {saveError ? <p>{saveError}</p> : null}
 
@@ -92,17 +106,20 @@ export function LabelScreen({
         Clear
       </button>
       <button type="button" onClick={handleSaveDrawing} disabled={!prompt}>
-        Save this drawing
+        Save drawing
       </button>
       <button
         type="button"
         onClick={() => onNavigate("train")}
         disabled={!ready}
       >
-        Train my model
+        Teach my AI
       </button>
-      <button type="button" onClick={() => onNavigate("pick")}>
-        Back
+      <button
+        type="button"
+        onClick={() => onNavigate(labelMode === "addMore" ? "home" : "pick")}
+      >
+        {labelMode === "addMore" ? "Back home" : "Back to topics"}
       </button>
     </section>
   );

@@ -4,7 +4,6 @@ import { LABEL_DISPLAY, MAX_TOPICS, type DrawTopic } from "./drawBank";
 import { clearSavedModel } from "./draw/classifier";
 import type { Stroke } from "./draw/strokeCapture";
 import type { UserLabel } from "./labels";
-import { DevNav } from "./components/DevNav";
 import { HomeScreen } from "./screens/HomeScreen";
 import { LabelScreen } from "./screens/LabelScreen";
 import { PickScreen } from "./screens/PickScreen";
@@ -22,6 +21,8 @@ import {
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { HomeButton } from "./components/HomeButton";
 
+type LabelMode = "new" | "addMore";
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
   const [targetLabel, setTargetLabel] = useState<DrawTopic | null>(null);
@@ -33,12 +34,14 @@ export default function App() {
   >({});
   const [library, setLibrary] = useState<TrainingLibrary>(() => loadLibrary());
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
+  const [labelMode, setLabelMode] = useState<LabelMode>("new");
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
   const [removeConfirmMessage, setRemoveConfirmMessage] = useState("");
 
   const untrainedTopics = getUntrainedTopics(library.records);
   const canAddTopic =
     library.records.length < MAX_TOPICS && untrainedTopics.length > 0;
+  const isHomeScreen = screen === "home";
 
   function refreshLibrary() {
     setLibrary(loadLibrary());
@@ -49,6 +52,7 @@ export default function App() {
       return;
     }
     setEditingRecordId(null);
+    setLabelMode("new");
     setTargetLabel(null);
     setLabeledDrawings({});
     setDrawingStrokes({});
@@ -64,6 +68,7 @@ export default function App() {
       return;
     }
     setEditingRecordId(null);
+    setLabelMode("new");
     setTargetLabel(topic);
     setLabeledDrawings({});
     setDrawingStrokes({});
@@ -96,12 +101,14 @@ export default function App() {
     });
 
     setEditingRecordId(null);
+    setLabelMode("new");
     refreshLibrary();
     setScreen("test");
   }
 
   function beginEditing(record: TrainingRecord) {
     setEditingRecordId(record.id);
+    setLabelMode("addMore");
     setTargetLabel(record.targetLabel);
     setLabeledDrawings({ ...record.labeledDrawings });
     setDrawingStrokes({ ...record.drawingStrokes });
@@ -122,7 +129,7 @@ export default function App() {
       return;
     }
     setRemoveConfirmMessage(
-      `Remove ${LABEL_DISPLAY[record.targetLabel]}? You can train it again later.`,
+      `Remove ${LABEL_DISPLAY[record.targetLabel]} from my AI? You can teach it again later.`,
     );
     setPendingRemoveId(recordId);
   }
@@ -163,14 +170,45 @@ export default function App() {
         />
       ) : null}
 
-      <main className="app-shell">
-        {screen !== "home" ? <HomeButton onClick={handleGoHome} /> : null}
-        <header className="app-header">
-          <h1>my-draw-ai</h1>
-          <p className="screen-label">Screen: {screen}</p>
-        </header>
+      <main className="app-root">
+        {!isHomeScreen ? <HomeButton onClick={handleGoHome} /> : null}
 
-        {screen === "home" && (
+        {!isHomeScreen ? (
+          <div className="app-page">
+            <header className="app-header">
+              <h1 className="app-title">my-ai-draw</h1>
+            </header>
+
+            {screen === "pick" && (
+              <PickScreen
+                availableTopics={untrainedTopics}
+                onChoose={handlePickTopic}
+              />
+            )}
+            {screen === "label" && targetLabel && (
+              <LabelScreen
+                target={targetLabel}
+                labelMode={labelMode}
+                labeled={labeledDrawings}
+                onAddDrawing={handleAddDrawing}
+                onNavigate={setScreen}
+              />
+            )}
+            {screen === "train" && targetLabel && (
+              <TrainScreen
+                targetLabel={targetLabel}
+                labeledDrawings={labeledDrawings}
+                drawingStrokes={drawingStrokes}
+                recordId={editingRecordId}
+                onComplete={handleTrainingComplete}
+                onRetry={() => setScreen("label")}
+              />
+            )}
+            {screen === "test" && <TestScreen />}
+          </div>
+        ) : null}
+
+        {isHomeScreen && (
           <HomeScreen
             records={library.records}
             canAddTopic={canAddTopic}
@@ -180,35 +218,6 @@ export default function App() {
             onAddMore={handleAddMore}
           />
         )}
-        {screen === "pick" && (
-          <PickScreen
-            availableTopics={untrainedTopics}
-            onChoose={handlePickTopic}
-            onNavigate={setScreen}
-          />
-        )}
-        {screen === "label" && targetLabel && (
-          <LabelScreen
-            target={targetLabel}
-            labeled={labeledDrawings}
-            strokes={drawingStrokes}
-            onAddDrawing={handleAddDrawing}
-            onNavigate={setScreen}
-          />
-        )}
-        {screen === "train" && targetLabel && (
-          <TrainScreen
-            targetLabel={targetLabel}
-            labeledDrawings={labeledDrawings}
-            drawingStrokes={drawingStrokes}
-            recordId={editingRecordId}
-            onComplete={handleTrainingComplete}
-            onRetry={() => setScreen("label")}
-          />
-        )}
-        {screen === "test" && <TestScreen />}
-
-        <DevNav screen={screen} onNavigate={setScreen} />
       </main>
     </>
   );

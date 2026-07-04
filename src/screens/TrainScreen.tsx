@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { Stroke } from "../draw/strokeCapture";
 import { LABEL_DISPLAY, type DrawTopic } from "../drawBank";
+import {
+  pickTrainingDonePhrase,
+  pickTrainingExtractingStartPhrase,
+  pickTrainingLearningPhrase,
+  pickTrainingSavingPhrase,
+} from "../copy/phrases";
 import { trainingClassLabels, type UserLabel } from "../labels";
 import { extractFromStrokes } from "../draw/featureExtractor";
 import { createDrawClassifier, type TrainingMetrics } from "../draw/classifier";
@@ -30,9 +36,7 @@ export function TrainScreen({
   onRetry,
 }: TrainScreenProps) {
   const [stage, setStage] = useState<TrainingStage>("extracting");
-  const [message, setMessage] = useState(
-    "Turning drawings into stroke features...",
-  );
+  const [message, setMessage] = useState(() => pickTrainingExtractingStartPhrase());
   const [progress, setProgress] = useState(0);
   const [metrics, setMetrics] = useState<TrainingMetrics | null>(null);
 
@@ -59,7 +63,7 @@ export function TrainScreen({
         const examples: { features: number[]; label: UserLabel }[] = [];
 
         setStage("extracting");
-        setMessage("Turning drawings into stroke features...");
+        setMessage(pickTrainingExtractingStartPhrase());
         setProgress(0);
 
         for (let index = 0; index < entries.length; index += 1) {
@@ -70,7 +74,7 @@ export function TrainScreen({
           if (!strokes) continue;
 
           setMessage(
-            `Turning drawings into features (${index + 1}/${entries.length})...`,
+            `I'm studying drawing ${index + 1} of ${entries.length}...`,
           );
           setProgress(Math.round(((index + 1) / entries.length) * 50));
 
@@ -85,7 +89,7 @@ export function TrainScreen({
         }
 
         setStage("training");
-        setMessage(`Training: ${LABEL_DISPLAY[targetLabel]} or not...`);
+        setMessage(pickTrainingLearningPhrase(LABEL_DISPLAY[targetLabel]));
         setProgress(60);
 
         const trainingMetrics = await classifier.train(examples, classLabels);
@@ -96,16 +100,14 @@ export function TrainScreen({
         setProgress(85);
 
         setStage("saving");
-        setMessage("Saving your model on this device...");
+        setMessage(pickTrainingSavingPhrase());
         await classifier.save(nextRecordId);
 
         if (isStale()) return;
 
         setProgress(100);
         setStage("done");
-        setMessage(
-          `Done! Training score: ${Math.round(trainingMetrics.accuracy * 100)}% on your drawings.`,
-        );
+        setMessage(pickTrainingDonePhrase(Math.round(trainingMetrics.accuracy * 100)));
       } catch (error) {
         if (isStale()) return;
         setStage("error");
@@ -123,12 +125,12 @@ export function TrainScreen({
 
   return (
     <section className="screen">
-      <h2>Train model</h2>
+      <h2>Teaching my AI</h2>
       <p>
-        This round teaches the model to spot {LABEL_DISPLAY[targetLabel]}{" "}
-        doodles vs everything else.
+        I'm learning to spot {LABEL_DISPLAY[targetLabel].toLowerCase()} doodles
+        and tell them apart from other drawings.
       </p>
-      <p>Drawings: {Object.keys(labeledDrawings).length}</p>
+      <p>Drawings in this round: {Object.keys(labeledDrawings).length}</p>
 
       <div aria-live="polite">
         <progress value={progress} max={100} />
@@ -145,13 +147,13 @@ export function TrainScreen({
             })
           }
         >
-          Test on canvas
+          Try it out
         </button>
       ) : null}
 
       {stage === "error" ? (
         <button type="button" onClick={onRetry}>
-          Go back and try again
+          Go back
         </button>
       ) : null}
     </section>

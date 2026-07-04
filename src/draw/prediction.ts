@@ -1,4 +1,5 @@
 import { LABEL_DISPLAY, type DrawTopic } from "../drawBank";
+import { pickGuessEmptyPhrase, pickGuessHeadline } from "../copy/phrases";
 
 export const GUESS_DEBOUNCE_MS = 600;
 
@@ -41,14 +42,6 @@ function toneForConfidence(confidence: number): GuessTone {
   return "unsure";
 }
 
-function headlineForTone(tone: GuessTone, label: string): string {
-  const lower = label.toLowerCase();
-  if (tone === "definite") return `That's a ${lower}!`;
-  if (tone === "likely") return `I think it's a ${lower}.`;
-  if (tone === "maybe") return `Maybe a ${lower}?`;
-  return "I'm not sure yet.";
-}
-
 function computeUnknownConfidence(rankings: TopicScore[]): number {
   const sum = rankings.reduce((total, item) => total + item.confidence, 0);
   return Math.max(0, 1 - sum);
@@ -76,7 +69,7 @@ export function formatMultiTopicGuess(
   // Empty / nearly empty canvas
   if (!best || best.confidence < EMPTY_CONFIDENCE_THRESHOLD) {
     return {
-      headline: "Draw something and I'll guess.",
+      headline: pickGuessEmptyPhrase(),
       detail: "",
       confidence: 0,
       topic: null,
@@ -91,7 +84,7 @@ export function formatMultiTopicGuess(
   const isSure = tone === "definite" || tone === "likely";
 
   return {
-    headline: headlineForTone(tone, best.label),
+    headline: pickGuessHeadline(tone, best.label),
     detail: "",
     confidence: best.confidence,
     topic: best.topic,
