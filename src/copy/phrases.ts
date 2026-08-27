@@ -1,8 +1,12 @@
 import { fillTemplate, formatList, pickRandom } from "./phrasePicker";
 
 const HOME_EMPTY_PHRASES = [
-  "I don't know any doodles yet. Teach me one to get started.",
-  "My doodle brain is empty so far. Teach me a topic to begin.",
+  "Click here to teach me something.",
+  "I am ready to learn.",
+  "What are you going to teach me next?",
+  "Teach me a doodle and I'll do my best to remember it.",
+  "I'm ready for a new doodle lesson.",
+  "Pick something to teach me.",
 ];
 
 const HOME_PROGRESS_CAN_ADD_PHRASES = [
@@ -61,17 +65,13 @@ const TRAINING_SAVING_PHRASES = [
 ];
 
 const TRAINING_DONE_PHRASES = [
-  "Done! I learned from your drawings. Score: {score}%.",
-  "All set! I learned from this round of drawings. Score: {score}%.",
-];
-
-const LABEL_TITLE_PHRASES = [
-  "Teach me: {topic}",
+  "Done! I learned from your drawings.",
+  "All set! I learned from this round of drawings.",
 ];
 
 const LABEL_PROMPT_TARGET_PHRASES = [
   "Draw a {topic}.",
-  "Can you draw a {topic}?",
+  "Can you draw a {topic} for me?",
 ];
 
 const LABEL_PROMPT_OTHER_PHRASES = [
@@ -104,11 +104,6 @@ const LABEL_READY_NEW_PHRASES = [
   "Your AI is ready to learn from these drawings.",
 ];
 
-const LABEL_NEED_MORE_PHRASES = [
-  "Keep going. I still need {needs}.",
-  "Let's keep teaching. I still need {needs}.",
-];
-
 const LABEL_SAVE_EMPTY_PHRASES = [
   "Draw something first, then save it.",
   "Make a doodle first, then tap save.",
@@ -116,6 +111,21 @@ const LABEL_SAVE_EMPTY_PHRASES = [
 
 export function pickHomeEmptyPhrase(): string {
   return pickRandom(HOME_EMPTY_PHRASES);
+}
+
+export function pickHomeEmptyPhrases(count: number): string[] {
+  const pool = [...HOME_EMPTY_PHRASES];
+
+  for (let index = pool.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
+  }
+
+  if (count <= pool.length) {
+    return pool.slice(0, count);
+  }
+
+  return Array.from({ length: count }, (_, index) => pool[index % pool.length]);
 }
 
 export function pickHomeProgressPhrase(
@@ -179,10 +189,8 @@ export function pickTrainingSavingPhrase(): string {
   return pickRandom(TRAINING_SAVING_PHRASES);
 }
 
-export function pickTrainingDonePhrase(score: number): string {
-  return fillTemplate(pickRandom(TRAINING_DONE_PHRASES), {
-    score: String(score),
-  });
+export function pickTrainingDonePhrase(): string {
+  return pickRandom(TRAINING_DONE_PHRASES);
 }
 
 export function pickLabelTitlePhrase(topicName: string): string {

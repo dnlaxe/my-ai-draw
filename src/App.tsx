@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./App.css";
 import { LABEL_DISPLAY, MAX_TOPICS, type DrawTopic } from "./drawBank";
 import { clearSavedModel } from "./draw/classifier";
 import type { Stroke } from "./draw/strokeCapture";
@@ -42,6 +41,7 @@ export default function App() {
   const canAddTopic =
     library.records.length < MAX_TOPICS && untrainedTopics.length > 0;
   const isHomeScreen = screen === "home";
+  const isCanvasScreen = screen === "label" || screen === "test";
 
   function refreshLibrary() {
     setLibrary(loadLibrary());
@@ -170,15 +170,13 @@ export default function App() {
         />
       ) : null}
 
-      <main className="app-root">
+      <main
+        className={`app-shell ${isHomeScreen ? "app-shell--home" : "app-shell--inner"}`}
+      >
         {!isHomeScreen ? <HomeButton onClick={handleGoHome} /> : null}
 
         {!isHomeScreen ? (
           <div className="app-page">
-            <header className="app-header">
-              <h1 className="app-title">my-ai-draw</h1>
-            </header>
-
             {screen === "pick" && (
               <PickScreen
                 availableTopics={untrainedTopics}
@@ -219,6 +217,13 @@ export default function App() {
           />
         )}
       </main>
+
+      <div className="portrait-warning" role="alert" aria-live="polite">
+        <div className="portrait-warning-card">
+          <h2>Turn your tablet sideways</h2>
+          <p>Please rotate to landscape to use my ai draw.</p>
+        </div>
+      </div>
     </>
   );
 }

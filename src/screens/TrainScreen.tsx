@@ -27,6 +27,17 @@ export type TrainScreenProps = {
   onRetry: () => void;
 };
 
+const EXTRACT_STEP_MS = 650;
+const LEARN_MIN_MS = 4800;
+const SAVE_MIN_MS = 1400;
+const TICK_MS = 90;
+
+function wait(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export function TrainScreen({
   targetLabel,
   labeledDrawings,
@@ -36,7 +47,9 @@ export function TrainScreen({
   onRetry,
 }: TrainScreenProps) {
   const [stage, setStage] = useState<TrainingStage>("extracting");
-  const [message, setMessage] = useState(() => pickTrainingExtractingStartPhrase());
+  const [message, setMessage] = useState(() =>
+    pickTrainingExtractingStartPhrase(),
+  );
   const [progress, setProgress] = useState(0);
   const [metrics, setMetrics] = useState<TrainingMetrics | null>(null);
 
@@ -53,9 +66,32 @@ export function TrainScreen({
     const classifier = createDrawClassifier();
     const classLabels = trainingClassLabels(targetLabel);
     const nextRecordId = savedRecordId.current;
+    const topicName = LABEL_DISPLAY[targetLabel];
 
     function isStale() {
       return cancelled || runId !== runIdRef.current;
+    }
+
+    async function pause(ms: number) {
+      const started = performance.now();
+      while (performance.now() - started < ms) {
+        if (isStale()) return;
+        await wait(Math.min(TICK_MS, ms));
+      }
+    }
+
+    async function crawlProgress(from: number, to: number, durationMs: number) {
+      const started = performance.now();
+      while (true) {
+        if (isStale()) return;
+        const elapsed = performance.now() - started;
+        // Ease-in so early progress feels heavy / slow to climb.
+        const t = Math.min(1, elapsed / durationMs);
+        const eased = t * t;
+        setProgress(Math.round(from + (to - from) * eased));
+        if (t >= 1) break;
+        await wait(TICK_MS);
+      }
     }
 
     async function runTraining() {
@@ -65,6 +101,8 @@ export function TrainScreen({
         setStage("extracting");
         setMessage(pickTrainingExtractingStartPhrase());
         setProgress(0);
+        await pause(700);
+        if (isStale()) return;
 
         for (let index = 0; index < entries.length; index += 1) {
           if (isStale()) return;
@@ -76,10 +114,11 @@ export function TrainScreen({
           setMessage(
             `I'm studying drawing ${index + 1} of ${entries.length}...`,
           );
-          setProgress(Math.round(((index + 1) / entries.length) * 50));
+          setProgress(Math.round(((index + 1) / entries.length) * 48));
 
           const features = extractFromStrokes(strokes);
           examples.push({ features, label });
+          await pause(EXTRACT_STEP_MS);
         }
 
         if (isStale()) return;
@@ -89,25 +128,55 @@ export function TrainScreen({
         }
 
         setStage("training");
-        setMessage(pickTrainingLearningPhrase(LABEL_DISPLAY[targetLabel]));
-        setProgress(60);
+        setMessage(pickTrainingLearningPhrase(topicName));
+        setProgress(50);
 
-        const trainingMetrics = await classifier.train(examples, classLabels);
+        const learnMessages = [
+          pickTrainingLearningPhrase(topicName),
+          `Looking hard at every ${topicName.toLowerCase()} line...`,
+          `Comparing ${topicName.toLowerCase()} doodles with the others...`,
+          `Almost locked in on ${topicName.toLowerCase()} shapes...`,
+        ];
+
+        let learnMessageIndex = 0;
+        const messageTimer = window.setInterval(() => {
+          if (isStale()) return;
+          learnMessageIndex = (learnMessageIndex + 1) % learnMessages.length;
+          setMessage(learnMessages[learnMessageIndex]);
+        }, 1100);
+
+        let trainingMetrics: TrainingMetrics;
+        try {
+          const trained = classifier.train(examples, classLabels);
+          await Promise.all([
+            crawlProgress(50, 82, LEARN_MIN_MS),
+            trained.then((result) => {
+              trainingMetrics = result;
+            }),
+            pause(LEARN_MIN_MS),
+          ]);
+        } finally {
+          window.clearInterval(messageTimer);
+        }
 
         if (isStale()) return;
 
-        setMetrics(trainingMetrics);
+        setMetrics(trainingMetrics!);
         setProgress(85);
 
         setStage("saving");
         setMessage(pickTrainingSavingPhrase());
-        await classifier.save(nextRecordId);
+        await Promise.all([
+          classifier.save(nextRecordId),
+          crawlProgress(85, 98, SAVE_MIN_MS),
+          pause(SAVE_MIN_MS),
+        ]);
 
         if (isStale()) return;
 
         setProgress(100);
         setStage("done");
-        setMessage(pickTrainingDonePhrase(Math.round(trainingMetrics.accuracy * 100)));
+        setMessage(pickTrainingDonePhrase());
       } catch (error) {
         if (isStale()) return;
         setStage("error");
@@ -124,37 +193,39 @@ export function TrainScreen({
   }, [targetLabel, labeledDrawings, drawingStrokes]);
 
   return (
-    <section className="screen">
-      <h2>Teaching my AI</h2>
-      <p>
-        I'm learning to spot {LABEL_DISPLAY[targetLabel].toLowerCase()} doodles
-        and tell them apart from other drawings.
+    <section className="train-screen screen-shell screen-scroll-region">
+      <p className="train-copy">
+        You drew {Object.keys(labeledDrawings).length} pictures.
       </p>
-      <p>Drawings in this round: {Object.keys(labeledDrawings).length}</p>
 
-      <div aria-live="polite">
-        <progress value={progress} max={100} />
-        <p className={`status-${stage}`}>{message}</p>
+      <div className="train-progress-region" aria-live="polite">
+        <progress className="train-progress" value={progress} max={100} />
+        <p className={`train-status train-status--${stage}`}>{message}</p>
       </div>
 
-      {stage === "done" && metrics ? (
+      <div className="train-actions toolbar">
         <button
           type="button"
-          onClick={() =>
+          disabled={stage !== "done" || !metrics}
+          onClick={() => {
+            if (!metrics) return;
             onComplete({
               recordId: savedRecordId.current,
               accuracy: metrics.accuracy,
-            })
-          }
+            });
+          }}
+          className="btn btn-primary"
         >
-          Try it out
+          Test me
         </button>
-      ) : null}
+      </div>
 
       {stage === "error" ? (
-        <button type="button" onClick={onRetry}>
-          Go back
-        </button>
+        <div className="train-actions toolbar">
+          <button type="button" onClick={onRetry} className="btn btn-secondary">
+            Go back
+          </button>
+        </div>
       ) : null}
     </section>
   );

@@ -1,0 +1,85 @@
+.label-screen {
+  display: flex;
+  height: 100dvh;
+  min-height: 0;
+  gap: 1rem;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.label-back-button {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 20;
+}
+
+.label-sidebar {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding-top: 3.5rem;
+  margin: 1rem;
+}
+
+.label-prompt {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  text-align: center;
+}
+
+.label-stats {
+  display: grid;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.label-error {
+  color: var(--danger);
+}
+
+.label-toolbar {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.label-toolbar-row {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.label-toolbar-row .btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.label-canvas-region {
+  height: 100%;
+  flex: none;
+  overflow: hidden;
+}
+
+.label-canvas-frame {
+  height: calc(100% - 2rem);
+  width: auto;
+  aspect-ratio: 1 / 1;
+  margin: 1rem;
+  flex-shrink: 0;
+}
+
+.label-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

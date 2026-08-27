@@ -7,6 +7,7 @@ import {
   pickLabelPromptTargetPhrase,
   pickLabelReadyPhrase,
 } from "./copy/phrases";
+import { pickRandom } from "./copy/phrasePicker";
 
 export type UserLabel = DrawTopic | "other";
 
@@ -56,6 +57,35 @@ function getBalancedFollowUpPrompt(
   };
 }
 
+function getNeededPrompt(
+  positive: number,
+  negative: number,
+  target: DrawTopic,
+  targetName: string,
+): Prompt | null {
+  const choices: Prompt[] = [];
+
+  if (positive < MIN_YES) {
+    choices.push({
+      label: target,
+      instruction: pickLabelPromptTargetPhrase(targetName),
+    });
+  }
+
+  if (negative < MIN_NO) {
+    choices.push({
+      label: "other",
+      instruction: pickLabelPromptOtherPhrase(targetName),
+    });
+  }
+
+  if (choices.length === 0) {
+    return null;
+  }
+
+  return pickRandom(choices);
+}
+
 export function getNextPrompt(
   labeled: Record<string, UserLabel>,
   target: DrawTopic,
@@ -63,19 +93,10 @@ export function getNextPrompt(
   options?: { keepAdding?: boolean },
 ): Prompt | null {
   const { positive, negative, total } = countLabels(labeled, target);
+  const neededPrompt = getNeededPrompt(positive, negative, target, targetName);
 
-  if (positive < MIN_YES) {
-    return {
-      label: target,
-      instruction: pickLabelPromptTargetPhrase(targetName),
-    };
-  }
-
-  if (negative < MIN_NO) {
-    return {
-      label: "other",
-      instruction: pickLabelPromptOtherPhrase(targetName),
-    };
+  if (neededPrompt) {
+    return neededPrompt;
   }
 
   if (total < MIN_TOTAL) {

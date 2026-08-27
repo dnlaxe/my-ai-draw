@@ -14,26 +14,26 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   return (
-    <div className="confirm-overlay" role="presentation" onClick={onCancel}>
+    <div className="dialog-overlay" role="presentation" onClick={onCancel}>
       <div
-        className="confirm-dialog"
+        className="dialog"
         role="dialog"
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
       >
-        <p>{message}</p>
-        <div className="confirm-dialog-actions">
+        <p className="dialog-message">{message}</p>
+        <div className="dialog-actions">
           <button
             type="button"
             onClick={onCancel}
-            className="button-pill button-pill--light"
+            className="btn btn-secondary"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="button-pill button-pill--danger"
+            className="btn btn-danger"
           >
             {confirmLabel}
           </button>

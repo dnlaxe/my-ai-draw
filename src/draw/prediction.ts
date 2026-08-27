@@ -1,12 +1,18 @@
 import { LABEL_DISPLAY, type DrawTopic } from "../drawBank";
 import { pickGuessEmptyPhrase, pickGuessHeadline } from "../copy/phrases";
+import type { Stroke } from "./strokeCapture";
 
 export const GUESS_DEBOUNCE_MS = 600;
 
+export const ACCEPT_THRESHOLD = 0.62;
+export const MARGIN_THRESHOLD = 0.12;
 export const DEFINITE_THRESHOLD = 0.85;
 export const NOT_SURE_THRESHOLD = 0.7;
 export const MAYBE_THRESHOLD = 0.35;
 export const EMPTY_CONFIDENCE_THRESHOLD = 0.01;
+const MIN_SIGNAL_POINTS = 8;
+const MIN_SIGNAL_PATH_LENGTH = 32;
+const MIN_SIGNAL_BOUNDS_DIAGONAL = 24;
 
 export type GuessTone = "definite" | "likely" | "maybe" | "unsure";
 
@@ -24,7 +30,7 @@ export type MultiTopicGuess = {
   tone: GuessTone;
   isSure: boolean; // true for definite/likely
   rankings: TopicScore[]; // all topics sorted
-  unknownConfidence: number; // 1 - sum(rankings)
+  unknownConfidence: number; // rule-based score for "I don't know"
 };
 
 export function confidencePercent(confidence: number): number {
@@ -43,8 +49,12 @@ function toneForConfidence(confidence: number): GuessTone {
 }
 
 function computeUnknownConfidence(rankings: TopicScore[]): number {
-  const sum = rankings.reduce((total, item) => total + item.confidence, 0);
-  return Math.max(0, 1 - sum);
+  const best = rankings[0]?.confidence ?? 0;
+  const second = rankings[1]?.confidence ?? 0;
+  const scoreGap = Math.max(0, best - second);
+  const acceptShortfall = Math.max(0, ACCEPT_THRESHOLD - best) / ACCEPT_THRESHOLD;
+  const marginShortfall = Math.max(0, MARGIN_THRESHOLD - scoreGap) / MARGIN_THRESHOLD;
+  return Math.min(1, Math.max(1 - best, acceptShortfall, marginShortfall));
 }
 
 export function scoreAllTrainedTopics(
@@ -63,8 +73,8 @@ export function formatMultiTopicGuess(
   const rankings = [...topicScores].sort(
     (left, right) => right.confidence - left.confidence,
   );
-  const unknownConfidence = computeUnknownConfidence(rankings);
   const best = rankings[0];
+  const second = rankings[1];
 
   // Empty / nearly empty canvas
   if (!best || best.confidence < EMPTY_CONFIDENCE_THRESHOLD) {
@@ -76,7 +86,27 @@ export function formatMultiTopicGuess(
       tone: "unsure",
       isSure: false,
       rankings,
-      unknownConfidence,
+      unknownConfidence: 1,
+    };
+  }
+
+  const scoreGap = best.confidence - (second?.confidence ?? 0);
+  if (
+    best.confidence < ACCEPT_THRESHOLD ||
+    (second && scoreGap < MARGIN_THRESHOLD)
+  ) {
+    return {
+      headline: "I don't know that doodle yet.",
+      detail:
+        second && scoreGap < MARGIN_THRESHOLD
+          ? `It looks a bit like both ${best.label.toLowerCase()} and ${second.label.toLowerCase()}.`
+          : "Try a bigger or clearer doodle.",
+      confidence: best.confidence,
+      topic: null,
+      tone: "unsure",
+      isSure: false,
+      rankings,
+      unknownConfidence: computeUnknownConfidence(rankings),
     };
   }
 
@@ -91,6 +121,51 @@ export function formatMultiTopicGuess(
     tone,
     isSure,
     rankings,
-    unknownConfidence,
+    unknownConfidence: computeUnknownConfidence(rankings),
   };
+}
+
+export function isLowSignalDrawing(strokes: Stroke[]): boolean {
+  if (strokes.length === 0) {
+    return true;
+  }
+
+  let totalPoints = 0;
+  let totalPathLength = 0;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const stroke of strokes) {
+    totalPoints += stroke.points.length;
+
+    for (let index = 0; index < stroke.points.length; index += 1) {
+      const point = stroke.points[index];
+      minX = Math.min(minX, point.x);
+      minY = Math.min(minY, point.y);
+      maxX = Math.max(maxX, point.x);
+      maxY = Math.max(maxY, point.y);
+
+      if (index === 0) {
+        continue;
+      }
+
+      const previous = stroke.points[index - 1];
+      totalPathLength += Math.hypot(point.x - previous.x, point.y - previous.y);
+    }
+  }
+
+  if (
+    totalPoints < MIN_SIGNAL_POINTS ||
+    totalPathLength < MIN_SIGNAL_PATH_LENGTH
+  ) {
+    return true;
+  }
+
+  const boundsDiagonal = Number.isFinite(minX)
+    ? Math.hypot(maxX - minX, maxY - minY)
+    : 0;
+
+  return boundsDiagonal < MIN_SIGNAL_BOUNDS_DIAGONAL;
 }

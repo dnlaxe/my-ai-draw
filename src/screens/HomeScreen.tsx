@@ -34,27 +34,35 @@ export function HomeScreen({
   }, [records, hasModels, canAddTopic]);
 
   return (
-    <section className="screen">
-      <h2>My AI</h2>
+    <section className="home-screen">
+      <h2 className="home-title">My AI</h2>
 
-      {progressPhrase ? <p>{progressPhrase}</p> : null}
+      {progressPhrase ? (
+        <p className="home-progress">{progressPhrase}</p>
+      ) : null}
 
-      <button type="button" onClick={onAdd} disabled={!canAddTopic}>
-        + Teach a topic
-      </button>
-
-      <div>
+      <div
+        className={`home-list-region screen-scroll-region ${hasModels ? "home-list-region--with-action" : ""}`}
+      >
         <TrainingRecordList
           records={records}
+          canAddTopic={canAddTopic}
+          onAdd={onAdd}
           onRemove={onRemove}
           onAddMore={onAddMore}
         />
       </div>
 
       {hasModels ? (
-        <button type="button" onClick={onTest}>
-          Try a doodle
-        </button>
+        <div className="home-docked-action screen-docked-footer">
+          <button
+            type="button"
+            onClick={onTest}
+            className="home-test-button btn btn-primary"
+          >
+            See what I know
+          </button>
+        </div>
       ) : null}
     </section>
   );

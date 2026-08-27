@@ -1,0 +1,54 @@
+.train-screen {
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 12vw;
+  text-align: center;
+}
+
+.train-copy {
+  color: var(--text-muted);
+}
+
+.train-progress-region {
+  display: grid;
+  gap: var(--space-4);
+  align-self: stretch;
+}
+
+.train-progress {
+  width: 100%;
+}
+
+.train-status {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+}
+
+.train-status--extracting,
+.train-status--saving {
+  color: var(--text-muted);
+}
+
+.train-status--training {
+  color: var(--text);
+}
+
+.train-status--done {
+  color: var(--text);
+}
+
+.train-status--error {
+  color: var(--danger);
+}
+
+.train-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.25rem;
+}
+
+.train-actions .btn {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  padding: 0.85rem 1.5rem;
+}

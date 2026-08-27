@@ -7,23 +7,33 @@ type PickScreenProps = {
 
 export function PickScreen({ availableTopics, onChoose }: PickScreenProps) {
   return (
-    <section className="screen">
-      <h2>What should I learn?</h2>
-      <p>You can teach me up to {MAX_TOPICS} kinds of doodles.</p>
+    <section className="pick-screen">
+      <h2 className="pick-title">What should I learn?</h2>
+      <p className="pick-intro">
+        You can teach me up to {MAX_TOPICS} kinds of doodles.
+      </p>
 
-      {availableTopics.length > 0 ? (
-        <ul>
-          {availableTopics.map((topic) => (
-            <li key={topic}>
-              <button type="button" onClick={() => onChoose(topic)}>
-                {LABEL_DISPLAY[topic]}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>You've already taught me every topic for now.</p>
-      )}
+      <div className="pick-grid-region screen-scroll-region">
+        {availableTopics.length > 0 ? (
+          <ul className="pick-grid">
+            {availableTopics.map((topic) => (
+              <li key={topic} className="pick-card card">
+                <button
+                  type="button"
+                  onClick={() => onChoose(topic)}
+                  className="pick-button"
+                >
+                  {LABEL_DISPLAY[topic]}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="pick-empty-state">
+            You&apos;ve already taught me every topic for now.
+          </p>
+        )}
+      </div>
     </section>
   );
 }

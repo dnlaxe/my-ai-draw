@@ -1,0 +1,50 @@
+.test-prediction {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.test-toolbar {
+  margin-top: auto;
+}
+
+.test-headline {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.test-detail {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.test-rankings {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.test-ranking-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8rem, 1.4fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  list-style: none;
+}
+
+.test-ranking-label {
+  font-weight: 600;
+}
+
+.test-ranking-bar {
+  min-width: 0;
+}
+
+.test-ranking-value {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

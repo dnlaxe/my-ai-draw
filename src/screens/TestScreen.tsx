@@ -6,6 +6,7 @@ import {
   confidencePercentLabel,
   formatMultiTopicGuess,
   GUESS_DEBOUNCE_MS,
+  isLowSignalDrawing,
   scoreAllTrainedTopics,
   type MultiTopicGuess,
 } from "../draw/prediction";
@@ -27,6 +28,24 @@ export function TestScreen() {
   const [guess, setGuess] = useState<MultiTopicGuess | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [idleHeadline] = useState(() => pickTestIdlePhrase());
+
+  const buildIdleGuess = useCallback(
+    (headline: string, detail = ""): MultiTopicGuess => ({
+      headline,
+      detail,
+      confidence: 0,
+      topic: null,
+      tone: "unsure",
+      isSure: false,
+      rankings: modelsRef.current.map((item) => ({
+        topic: item.topic,
+        confidence: 0,
+        label: LABEL_DISPLAY[item.topic],
+      })),
+      unknownConfidence: 1,
+    }),
+    [],
+  );
 
   useEffect(() => {
     isActiveRef.current = true;
@@ -51,20 +70,7 @@ export function TestScreen() {
 
         modelsRef.current = models;
 
-        setGuess({
-          headline: idleHeadline,
-          detail: "",
-          confidence: 0,
-          topic: null,
-          tone: "unsure",
-          isSure: false,
-          rankings: models.map((item) => ({
-            topic: item.topic,
-            confidence: 0,
-            label: LABEL_DISPLAY[item.topic],
-          })),
-          unknownConfidence: 1,
-        });
+        setGuess(buildIdleGuess(idleHeadline));
 
         setIsReady(true);
         setStatus("");
@@ -88,7 +94,7 @@ export function TestScreen() {
       }
       modelsRef.current = [];
     };
-  }, [idleHeadline]);
+  }, [buildIdleGuess, idleHeadline]);
 
   const resetIdleGuess = useCallback(() => {
     const models = modelsRef.current;
@@ -96,21 +102,8 @@ export function TestScreen() {
       return;
     }
 
-    setGuess({
-      headline: idleHeadline,
-      detail: "",
-      confidence: 0,
-      topic: null,
-      tone: "unsure",
-      isSure: false,
-      rankings: models.map((item) => ({
-        topic: item.topic,
-        confidence: 0,
-        label: LABEL_DISPLAY[item.topic],
-      })),
-      unknownConfidence: 1,
-    });
-  }, [idleHeadline]);
+    setGuess(buildIdleGuess(idleHeadline));
+  }, [buildIdleGuess, idleHeadline]);
 
   const runGuess = useCallback(() => {
     if (!isActiveRef.current) {
@@ -125,6 +118,16 @@ export function TestScreen() {
       return;
     }
 
+    if (isLowSignalDrawing(strokes)) {
+      setGuess(
+        buildIdleGuess(
+          "Draw a little more and I'll try again.",
+          "That doodle is too small or quick for me to guess yet.",
+        ),
+      );
+      return;
+    }
+
     const features = extractFromStrokes(strokes);
 
     const topicScores = models.map((item) => {
@@ -136,7 +139,7 @@ export function TestScreen() {
     });
 
     setGuess(formatMultiTopicGuess(scoreAllTrainedTopics(topicScores)));
-  }, [resetIdleGuess]);
+  }, [buildIdleGuess, resetIdleGuess]);
 
   function handleClear() {
     captureRef.current.clear();
@@ -176,54 +179,82 @@ export function TestScreen() {
   }, [isReady, runGuess]);
 
   return (
-    <section className="screen test-screen">
-      <h2>Try my AI</h2>
-      <div className="prediction-panel" aria-live="polite">
-        {guess ? (
-          <>
-            <p className="prediction-headline">{guess.headline}</p>
-            {guess.detail ? <p>{guess.detail}</p> : null}
+    <section className="label-screen test-screen">
+      <div className="label-sidebar test-panel">
+        <div className="label-copy test-prediction" aria-live="polite">
+          {guess ? (
+            <>
+              <p className="test-headline">{guess.headline}</p>
+              {guess.detail ? (
+                <p className="test-detail">{guess.detail}</p>
+              ) : null}
 
-            {guess.rankings.length > 0 ? (
-              <ul className="confidence-rankings">
-                {guess.rankings.map((item) => (
-                  <li key={item.topic}>
-                    <span>{item.label}</span>
+              {guess.rankings.length > 0 ? (
+                <ul className="test-rankings">
+                  {guess.rankings.map((item) => (
+                    <li key={item.topic} className="test-ranking-item">
+                      <span className="test-ranking-label">{item.label}</span>
+                      <progress
+                        className="test-ranking-bar"
+                        value={confidencePercent(item.confidence)}
+                        max={100}
+                      />
+                      <span className="test-ranking-value">
+                        {confidencePercentLabel(item.confidence)}
+                      </span>
+                    </li>
+                  ))}
+                  <li className="test-ranking-item">
+                    <span className="test-ranking-label">
+                      I don&apos;t know
+                    </span>
                     <progress
-                      value={confidencePercent(item.confidence)}
+                      className="test-ranking-bar"
+                      value={confidencePercent(guess.unknownConfidence)}
                       max={100}
                     />
-                    <span>{confidencePercentLabel(item.confidence)}</span>
+                    <span className="test-ranking-value">
+                      {confidencePercentLabel(guess.unknownConfidence)}
+                    </span>
                   </li>
-                ))}
-                <li>
-                  <span>I don&apos;t know</span>
-                  <progress
-                    value={confidencePercent(guess.unknownConfidence)}
-                    max={100}
-                  />
-                  <span>{confidencePercentLabel(guess.unknownConfidence)}</span>
-                </li>
-              </ul>
-            ) : null}
-          </>
-        ) : (
-          <p>{status}</p>
-        )}
+                </ul>
+              ) : null}
+            </>
+          ) : (
+            <p className="test-detail">{status}</p>
+          )}
+        </div>
+
+        <div className="label-toolbar test-toolbar">
+          <div className="label-toolbar-row toolbar">
+            <button
+              type="button"
+              onClick={handleUndo}
+              className="btn btn-secondary"
+            >
+              Undo
+            </button>
+            <button
+              type="button"
+              onClick={handleClear}
+              className="btn btn-secondary"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
       </div>
-      <canvas
-        ref={canvasRef}
-        width={320}
-        height={320}
-        aria-label="Drawing canvas"
-      />
-      <div className="canvas-toolbar">
-        <button type="button" onClick={handleUndo}>
-          Undo
-        </button>
-        <button type="button" onClick={handleClear}>
-          Clear
-        </button>
+
+      <div className="label-canvas-region test-canvas-dock">
+        <div className="label-canvas-frame test-canvas-frame canvas-frame">
+          <canvas
+            ref={canvasRef}
+            width={320}
+            height={320}
+            aria-label="Drawing canvas"
+            className="label-canvas test-canvas canvas-element"
+          />
+        </div>
       </div>
     </section>
   );

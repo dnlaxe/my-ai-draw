@@ -1,0 +1,91 @@
+.home-screen {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 1rem;
+}
+
+.home-title {
+  flex-shrink: 0;
+  padding: 1rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.home-progress {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem 1rem;
+  color: var(--text-muted);
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+}
+
+.home-list-region {
+  flex: 1;
+}
+
+.home-list-region--with-action {
+  padding-bottom: 6.5rem;
+}
+
+.home-docked-action {
+  width: 100%;
+}
+
+.home-test-button {
+  width: 100%;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  padding: 0.9rem 1.25rem;
+}
+
+.home-record-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  list-style: none;
+  align-content: start;
+}
+
+.home-record-card {
+  min-height: 12rem;
+}
+
+.home-record-card--empty {
+  justify-content: space-between;
+}
+
+.home-record-remove {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.home-record-title {
+  padding-right: 3rem;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 800;
+}
+
+.home-record-stats {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+}
+
+.home-record-placeholder-copy {
+  color: var(--text-muted);
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+}
+
+.home-record-action,
+.home-record-create {
+  width: 100%;
+  margin-top: auto;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+}

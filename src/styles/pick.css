@@ -1,0 +1,64 @@
+.pick-screen {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 1rem;
+}
+
+.pick-title {
+  flex-shrink: 0;
+  padding: 1rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.pick-intro {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem 1rem;
+  color: var(--text-muted);
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+}
+
+.pick-grid-region {
+  flex: 1;
+}
+
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  list-style: none;
+  align-content: start;
+}
+
+.pick-card {
+  min-height: 7rem;
+  padding: 0;
+}
+
+.pick-button {
+  display: flex;
+  width: 100%;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  padding: 1rem;
+  color: var(--text);
+  font: inherit;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  text-align: center;
+  cursor: pointer;
+}
+
+.pick-empty-state {
+  padding: 1rem;
+  color: var(--text-muted);
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+}
