@@ -40,6 +40,10 @@
   font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   font-weight: 800;
   padding: 0.9rem 1.25rem;
+  border-radius: 1rem;
+  border-color: var(--blue);
+  background: var(--blue);
+  color: var(--white);
 }
 
 .home-record-list {
@@ -53,6 +57,7 @@
 
 .home-record-card {
   min-height: 12rem;
+  border-radius: 1rem;
 }
 
 .home-record-card--empty {
@@ -63,6 +68,10 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--danger);
+  color: var(--white);
 }
 
 .home-record-title {
@@ -88,4 +97,17 @@
   width: 100%;
   margin-top: auto;
   font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  border-radius: 1rem;
+}
+
+.home-record-action {
+  border-color: var(--yellow);
+  background: var(--yellow);
+  color: var(--dark);
+}
+
+.home-record-create {
+  border-color: var(--green);
+  background: var(--green);
+  color: var(--white);
 }

@@ -13,7 +13,7 @@ export function PickScreen({ availableTopics, onChoose }: PickScreenProps) {
         You can teach me up to {MAX_TOPICS} kinds of doodles.
       </p>
 
-      <div className="pick-grid-region screen-scroll-region">
+      <div className="pick-grid-region">
         {availableTopics.length > 0 ? (
           <ul className="pick-grid">
             {availableTopics.map((topic) => (

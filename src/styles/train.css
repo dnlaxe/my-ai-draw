@@ -5,10 +5,6 @@
   text-align: center;
 }
 
-.train-copy {
-  color: var(--text-muted);
-}
-
 .train-progress-region {
   display: grid;
   gap: var(--space-4);
@@ -17,6 +13,27 @@
 
 .train-progress {
   width: 100%;
+  height: 1.25rem;
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.train-progress::-webkit-progress-bar {
+  background: var(--white);
+  border-radius: 999px;
+}
+
+.train-progress::-webkit-progress-value {
+  background: var(--green);
+  border-radius: 999px;
+}
+
+.train-progress::-moz-progress-bar {
+  background: var(--green);
+  border-radius: 999px;
 }
 
 .train-status {
@@ -51,4 +68,11 @@
   font-size: clamp(1.75rem, 3.5vw, 2.5rem);
   font-weight: 800;
   padding: 0.85rem 1.5rem;
+}
+
+.train-actions .btn-primary {
+  border-radius: 1rem;
+  border-color: var(--blue);
+  background: var(--blue);
+  color: var(--white);
 }

@@ -78,14 +78,6 @@ export function LabelScreen({
 
   return (
     <section className="label-screen">
-      <button
-        type="button"
-        onClick={() => onNavigate(labelMode === "addMore" ? "home" : "pick")}
-        className="label-back-button btn btn-secondary"
-      >
-        {labelMode === "addMore" ? "Back home" : "Back to topics"}
-      </button>
-
       <div className="label-sidebar">
         <p className="label-prompt">{promptText}</p>
 
@@ -122,7 +114,7 @@ export function LabelScreen({
               type="button"
               onClick={() => onNavigate("train")}
               disabled={!ready}
-              className="btn btn-primary"
+              className="label-train-button btn btn-primary"
             >
               Teach my AI
             </button>
@@ -130,7 +122,7 @@ export function LabelScreen({
               type="button"
               onClick={handleSaveDrawing}
               disabled={!prompt}
-              className="btn btn-primary"
+              className="label-save-button btn btn-primary"
             >
               Save drawing
             </button>

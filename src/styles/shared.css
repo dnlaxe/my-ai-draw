@@ -1,17 +1,21 @@
 :root {
-  --black: #000000;
+  --dark: #1e2221;
   --white: #ffffff;
-  --grey: #737373;
-  --red: #cc0000;
+  --light: #e1e6ec;
+  --red: #bf0b5f;
+  --purple: #7c3f8c;
+  --green: #03a696;
+  --yellow: #f2b90c;
+  --blue: #3572a8;
 
-  --app-bg: var(--white);
+  --app-bg: var(--light);
   --surface: var(--white);
   --surface-muted: var(--white);
-  --border: var(--grey);
-  --border-strong: var(--black);
-  --text: var(--black);
-  --text-muted: var(--grey);
-  --primary: var(--black);
+  --border: var(--dark);
+  --border-strong: var(--dark);
+  --text: var(--dark);
+  --text-muted: var(--dark);
+  --primary: var(--dark);
   --primary-contrast: var(--white);
   --danger: var(--red);
   --space-1: 0.25rem;
@@ -133,9 +137,9 @@ progress {
   padding: 2rem 1rem 1rem;
   background: linear-gradient(
     to top,
-    rgb(255 255 255 / 1) 55%,
-    rgb(255 255 255 / 0.9) 75%,
-    rgb(255 255 255 / 0)
+    var(--light) 55%,
+    color-mix(in srgb, var(--light) 90%, transparent) 75%,
+    transparent
   );
   pointer-events: none;
 }
@@ -249,6 +253,7 @@ progress {
   align-items: center;
   justify-content: center;
   padding: 0;
+  border-radius: 50%;
 }
 
 .app-home-button-icon {
@@ -263,24 +268,36 @@ progress {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgb(0 0 0 / 0.45);
+  background: rgb(30 34 33 / 0.45);
 }
 
 .dialog {
-  width: min(24rem, 100%);
+  width: min(28rem, 100%);
   border: 1px solid var(--border);
   background: var(--surface);
-  padding: var(--space-5);
+  padding: var(--space-6);
+  border-radius: 1rem;
 }
 
 .dialog-message {
   color: var(--text);
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .dialog-actions {
   display: flex;
   gap: var(--space-3);
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.dialog-actions .btn {
+  flex: 1;
+  border-radius: 1rem;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  font-weight: 800;
+  padding: 0.9rem 1.25rem;
 }
 
 .portrait-warning {
@@ -294,6 +311,7 @@ progress {
   border: 1px solid var(--border);
   background: var(--surface);
   padding: var(--space-6);
+  border-radius: 1rem;
   text-align: center;
 }
 

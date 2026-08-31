@@ -181,49 +181,47 @@ export function TestScreen() {
   return (
     <section className="label-screen test-screen">
       <div className="label-sidebar test-panel">
-        <div className="label-copy test-prediction" aria-live="polite">
+        <div className="test-message" aria-live="polite">
           {guess ? (
             <>
               <p className="test-headline">{guess.headline}</p>
               {guess.detail ? (
                 <p className="test-detail">{guess.detail}</p>
               ) : null}
-
-              {guess.rankings.length > 0 ? (
-                <ul className="test-rankings">
-                  {guess.rankings.map((item) => (
-                    <li key={item.topic} className="test-ranking-item">
-                      <span className="test-ranking-label">{item.label}</span>
-                      <progress
-                        className="test-ranking-bar"
-                        value={confidencePercent(item.confidence)}
-                        max={100}
-                      />
-                      <span className="test-ranking-value">
-                        {confidencePercentLabel(item.confidence)}
-                      </span>
-                    </li>
-                  ))}
-                  <li className="test-ranking-item">
-                    <span className="test-ranking-label">
-                      I don&apos;t know
-                    </span>
-                    <progress
-                      className="test-ranking-bar"
-                      value={confidencePercent(guess.unknownConfidence)}
-                      max={100}
-                    />
-                    <span className="test-ranking-value">
-                      {confidencePercentLabel(guess.unknownConfidence)}
-                    </span>
-                  </li>
-                </ul>
-              ) : null}
             </>
           ) : (
-            <p className="test-detail">{status}</p>
+            <p className="test-headline">{status}</p>
           )}
         </div>
+
+        {guess && guess.rankings.length > 0 ? (
+          <ul className="test-rankings">
+            {guess.rankings.map((item) => (
+              <li key={item.topic} className="test-ranking-item">
+                <span className="test-ranking-label">{item.label}</span>
+                <progress
+                  className="test-ranking-bar"
+                  value={confidencePercent(item.confidence)}
+                  max={100}
+                />
+                <span className="test-ranking-value">
+                  {confidencePercentLabel(item.confidence)}
+                </span>
+              </li>
+            ))}
+            <li className="test-ranking-item">
+              <span className="test-ranking-label">I don&apos;t know</span>
+              <progress
+                className="test-ranking-bar"
+                value={confidencePercent(guess.unknownConfidence)}
+                max={100}
+              />
+              <span className="test-ranking-value">
+                {confidencePercentLabel(guess.unknownConfidence)}
+              </span>
+            </li>
+          </ul>
+        ) : null}
 
         <div className="label-toolbar test-toolbar">
           <div className="label-toolbar-row toolbar">

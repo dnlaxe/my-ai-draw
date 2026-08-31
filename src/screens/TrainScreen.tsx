@@ -112,7 +112,7 @@ export function TrainScreen({
           if (!strokes) continue;
 
           setMessage(
-            `I'm studying drawing ${index + 1} of ${entries.length}...`,
+            `I'm studying drawing ${index + 1}...`,
           );
           setProgress(Math.round(((index + 1) / entries.length) * 48));
 
@@ -194,10 +194,6 @@ export function TrainScreen({
 
   return (
     <section className="train-screen screen-shell screen-scroll-region">
-      <p className="train-copy">
-        You drew {Object.keys(labeledDrawings).length} pictures.
-      </p>
-
       <div className="train-progress-region" aria-live="polite">
         <progress className="train-progress" value={progress} max={100} />
         <p className={`train-status train-status--${stage}`}>{message}</p>

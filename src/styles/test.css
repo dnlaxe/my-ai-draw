@@ -1,19 +1,29 @@
-.test-prediction {
-  display: grid;
+.test-panel {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.test-message {
+  display: flex;
   flex: 1;
-  align-content: center;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: var(--space-3);
   text-align: center;
 }
 
 .test-toolbar {
-  margin-top: auto;
+  flex-shrink: 0;
+  margin-top: var(--space-4);
 }
 
 .test-headline {
-  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-size: clamp(2.25rem, 4.5vw, 3.5rem);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .test-detail {
@@ -24,6 +34,7 @@
 
 .test-rankings {
   display: grid;
+  flex-shrink: 0;
   gap: var(--space-3);
 }
 
@@ -41,6 +52,27 @@
 
 .test-ranking-bar {
   min-width: 0;
+  height: 1rem;
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.test-ranking-bar::-webkit-progress-bar {
+  background: var(--white);
+  border-radius: 999px;
+}
+
+.test-ranking-bar::-webkit-progress-value {
+  background: var(--green);
+  border-radius: 999px;
+}
+
+.test-ranking-bar::-moz-progress-bar {
+  background: var(--green);
+  border-radius: 999px;
 }
 
 .test-ranking-value {
