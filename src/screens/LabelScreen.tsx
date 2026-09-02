@@ -10,9 +10,6 @@ import {
   canStartTraining,
   countLabels,
   getNextPrompt,
-  MIN_NO,
-  MIN_TOTAL,
-  MIN_YES,
   type UserLabel,
 } from "../labels";
 import type { Navigate } from "./types";
@@ -84,11 +81,11 @@ export function LabelScreen({
         <div className="label-stats">
           {saveError ? <p className="label-error">{saveError}</p> : null}
           <p>
-            {targetName}: {counts.positive} (need {MIN_YES}) · Other:{" "}
-            {counts.negative} (need {MIN_NO})
+            {targetName}: <strong>{counts.positive}</strong> · Other:{" "}
+            <strong>{counts.negative}</strong>
           </p>
           <p>
-            Saved drawings: {counts.total}/{MIN_TOTAL}
+            Saved drawings: <strong>{counts.total}</strong>
           </p>
         </div>
 

@@ -47,8 +47,13 @@ export function TrainingRecordList({
           <p className="home-record-title">{LABEL_DISPLAY[record.targetLabel]}</p>
 
           <div className="home-record-stats">
-            <p>How well I learned: {accuracyPercent(record.accuracy)}%</p>
-            <p>{record.exampleCount} saved drawings</p>
+            <p>
+              How well I learned:{" "}
+              <strong>{accuracyPercent(record.accuracy)}%</strong>
+            </p>
+            <p>
+              <strong>{record.exampleCount}</strong> saved drawings
+            </p>
           </div>
 
           <button

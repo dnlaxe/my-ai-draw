@@ -4,10 +4,10 @@ import type { Stroke } from "./strokeCapture";
 
 export const GUESS_DEBOUNCE_MS = 600;
 
-export const ACCEPT_THRESHOLD = 0.62;
-export const MARGIN_THRESHOLD = 0.12;
+export const ACCEPT_THRESHOLD = 0.58;
+export const MARGIN_THRESHOLD = 0.06;
 export const DEFINITE_THRESHOLD = 0.85;
-export const NOT_SURE_THRESHOLD = 0.7;
+export const NOT_SURE_THRESHOLD = 0.58;
 export const MAYBE_THRESHOLD = 0.35;
 export const EMPTY_CONFIDENCE_THRESHOLD = 0.01;
 const MIN_SIGNAL_POINTS = 8;
