@@ -41,7 +41,6 @@ export default function App() {
   const canAddTopic =
     library.records.length < MAX_TOPICS && untrainedTopics.length > 0;
   const isHomeScreen = screen === "home";
-  const isCanvasScreen = screen === "label" || screen === "test";
 
   function refreshLibrary() {
     setLibrary(loadLibrary());

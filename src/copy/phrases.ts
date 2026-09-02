@@ -109,6 +109,12 @@ const LABEL_SAVE_EMPTY_PHRASES = [
   "Make a doodle first, then tap save.",
 ];
 
+const LABEL_NEED_MORE_PHRASES = [
+  "You still need {needs}.",
+  "Keep going — you need {needs}.",
+  "Almost there! You need {needs}.",
+];
+
 export function pickHomeEmptyPhrase(): string {
   return pickRandom(HOME_EMPTY_PHRASES);
 }
@@ -191,12 +197,6 @@ export function pickTrainingSavingPhrase(): string {
 
 export function pickTrainingDonePhrase(): string {
   return pickRandom(TRAINING_DONE_PHRASES);
-}
-
-export function pickLabelTitlePhrase(topicName: string): string {
-  return fillTemplate(pickRandom(LABEL_TITLE_PHRASES), {
-    topic: topicName,
-  });
 }
 
 export function pickLabelPromptTargetPhrase(topicName: string): string {
