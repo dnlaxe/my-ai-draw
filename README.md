@@ -1,9 +1,7 @@
-# My-AI-Draw
+# My AI Draw
 
-An in-class interactive app for young learners. Students draw doodles on a tablet or laptop, label examples, and train a tiny classifier.
-
-No cloud or no chatbots for safety. Just ML.
+An interactive classroom app where students draw doodles on a tablet or laptop, label examples, and train a small image classifier directly in the browser.
 
 ## Stack
 
-Vite, React, Typescript, TensorFlow.js, Canvas API
+React, TypeScript, Tailwind CSS, TensorFlow.js, Canvas API, Vite
